@@ -1,0 +1,14 @@
+- name: "apt-get update"
+  shell: |
+    apt-get update
+  tags:
+    - disk
+    - pkgs
+
+- name: "Install util-linux"
+  apt: >
+    name=util-linux
+    state=present
+  tags:
+    - disk
+    - pkgs

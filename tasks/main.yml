@@ -1,0 +1,52 @@
+#####################
+# Ubuntu
+- include: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu' and disk_additional_disks
+
+#####################
+# Debian
+- include: debian.yml
+  when: ansible_distribution == 'Debian' and disk_additional_disks
+
+- name: "Check if the specified filesystem is supported"
+  fail: >
+     msg="Unsupported filesystem '{{ item.fstype }}' for disk '{{ item.disk }}'"
+  when: item.fstype not in disk_supported_fs_types
+  with_items: disk_additional_disks
+  tags:
+    - disk
+
+- name: "Format additional disks"
+  shell: |
+    executable=/bin/bash
+    if
+        [ -e {{ item.disk }} ]
+    then
+        [ -b {{ item.disk }}1 ] || echo 0,,8e | sfdisk {{ item.disk }}
+        [[ `blkid | grep {{ item.disk }}1 | grep {{ item.fstype }}` ]] || mkfs.{{ item.fstype }} {{ item.disk }}1
+    fi
+  with_items: disk_additional_disks
+  tags:
+    - disk
+
+- name: "Ensure the /data directory exists"
+  file: >
+    path={{ item.mount }}
+    owner=root
+    group=root
+    state=directory
+  with_items: disk_additional_disks
+  tags:
+    - disk
+
+- name: "Mount additional disk"
+  mount: >
+    name={{ item.mount }}
+    fstype={{ item.fstype }}
+    opts={{ item.mount_options }}
+    passno=0
+    src={{ item.disk }}1
+    state=mounted
+  with_items: disk_additional_disks
+  tags:
+    - disk

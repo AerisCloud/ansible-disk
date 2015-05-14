@@ -1,0 +1,4 @@
+disk_supported_fs_types:
+  - ext2
+  - ext3
+  - ext4

@@ -35,7 +35,7 @@
   tags:
     - disk
 
-- name: 'Ensure that user {{ disk_user }} exist'
+- name: "Ensure that user {{ disk_user }} exist"
   user: >
       name={{ disk_user }} 
       group={{ disk_group }} 

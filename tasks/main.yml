@@ -29,11 +29,23 @@
   tags:
     - disk
 
+- name: Ensure that group {{ disk_group }} esist
+  user: name={{ disk_group }}
+  when: disk_group is defined
+  tags:
+    - disk
+
+- name: Ensure that user {{ disk_user }} esist
+  user: name={{ disk_user }} group={{ disk_group }} shell=/bin/bash
+  when: disk_group is defined and disk_user is defined
+  tags:
+    - disk
+
 - name: "Ensure the /data directory exists"
   file: >
     path={{ item.mount }}
-    owner=root
-    group=root
+    owner={{ disk_user | default('root') }}
+    group={{ disk_group | default('root') }}
     state=directory
   with_items: disk_additional_disks
   tags:

@@ -27,6 +27,10 @@ disk_additional_disks:
 * `mount_options` allows you to specify custom mount options.
 * `mount` is the directory where the new disk should be mounted.
 
+You can add:
+* `disk_user` sets owner of the mount directory (default: root)
+* `disk_group` sets group of the mount directory (default: root)
+
 The following filesystems are currently supported:
 - [ext2](http://en.wikipedia.org/wiki/Ext2)
 - [ext3](http://en.wikipedia.org/wiki/Ext3)

@@ -30,7 +30,7 @@
     - disk
 
 - name: "Ensure that group {{ disk_group }} exist"
-  user: name={{ disk_group }}
+  group: name={{ disk_group }}
   when: disk_group is defined
   tags:
     - disk

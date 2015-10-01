@@ -32,6 +32,8 @@
     fstype: '{{ item.fstype }}'
     opts: '{{ item.fsopts|d(omit) }}'
   with_items: disk_additional_disks
+  tags:
+    - disk
 
 - name: "Ensure the mount directory exists"
   file: >
@@ -48,6 +50,8 @@
   register: disk_blkid
   with_items: disk_additional_disks
   changed_when: False
+  tags:
+    - disk
 
 - name: "Mount additional disk"
   mount:

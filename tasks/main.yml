@@ -1,5 +1,5 @@
 - name: "Install util-linux"
-  apt:
+  package:
     name: '{{ item }}'
     state: 'present'
   with_flattened:

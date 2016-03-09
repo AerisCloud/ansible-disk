@@ -4,7 +4,6 @@
     state: 'present'
   with_flattened:
     - 'parted'
-
   tags:
     - disk
     - pkgs

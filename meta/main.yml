@@ -3,7 +3,7 @@ galaxy_info:
   description: This role allows setting up extra disks and their mount points
   company: Wizcorp K.K.
   license: MIT
-  min_ansible_version: 1.8.1
+  min_ansible_version: 2.0.0
   platforms:
     - name: EL
       versions:

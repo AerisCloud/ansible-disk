@@ -1,15 +1,13 @@
-#####################
-
 - name: "Install util-linux"
-  apt:
+  package:
     name: '{{ item }}'
     state: 'present'
   with_flattened:
     - 'parted'
-  when: disk_additional_disks and ansible_distribution in [ 'Debian', 'Ubuntu' ]
   tags:
     - disk
     - pkgs
+  when: disk_additional_disks
 
 - name: "Partition additional disks"
   shell: |

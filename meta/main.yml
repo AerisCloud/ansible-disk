@@ -16,9 +16,6 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - all
-    - name: CentOS
-      versions:
-        - 6
-        - 7
   categories:
     - system
+dependencies: []

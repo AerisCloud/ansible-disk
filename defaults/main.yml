@@ -1,0 +1,4 @@
+---
+# Aditional disks that need to be formated and mouted.
+# See README for syntax and usage.
+disk_additional_disks: []

@@ -17,18 +17,16 @@
     creates: '{{ item.disk }}1'
     executable: '/bin/bash'
   with_items: '{{ disk_additional_disks }}'
-  tags:
-    - disk
+  tags: ['disk']
 
-- name: Create filesystem on the first partition
+- name: "Create filesystem on the first partition"
   filesystem:
     dev: '{{ item.disk }}1'
     force: '{{ item.force|d(omit) }}'
     fstype: '{{ item.fstype }}'
     opts: '{{ item.fsopts|d(omit) }}'
   with_items: '{{ disk_additional_disks }}'
-  tags:
-    - disk
+  tags: ['disk']
 
 - name: "Ensure the mount directory exists"
   file:
@@ -37,16 +35,14 @@
     group: '{{ disk_group | default("root") }}'
     state: directory
   with_items: '{{ disk_additional_disks }}'
-  tags:
-    - disk
+  tags: ['disk']
 
-- name: Get UUID for partition
+- name: "Get UUID for partition"
   command: blkid -s UUID -o value "{{ item.disk }}1"
   register: disk_blkid
   with_items: '{{ disk_additional_disks }}'
   changed_when: False
-  tags:
-    - disk
+  tags: ['disk']
 
 - name: "Mount additional disk"
   mount:
@@ -59,5 +55,4 @@
   with_together:
     - '{{ disk_additional_disks }}'
     - '{{ disk_blkid.results }}'
-  tags:
-    - disk
+  tags: ['disk']

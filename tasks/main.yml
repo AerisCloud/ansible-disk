@@ -1,13 +1,10 @@
-- name: "Install util-linux"
+- name: "Install parted"
   package:
-    name: '{{ item }}'
-    state: 'present'
-  with_flattened:
-    - 'parted'
-  tags:
-    - disk
-    - pkgs
+    name: parted
+    state: present
+    use: '{{ disk_package_use }}'
   when: disk_additional_disks
+  tags: ['disk', 'pkgs']
 
 - name: "Partition additional disks"
   shell: |

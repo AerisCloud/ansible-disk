@@ -30,6 +30,7 @@ disk_additional_disks:
 You can add:
 * `disk_user` sets owner of the mount directory (default: root)
 * `disk_group` sets group of the mount directory (default: root)
+* `disk_package_use` is the required package manager module to use (yum, apt, etc). The default 'auto' will use existing facts or try to autodetect it.
 
 The following filesystems are currently supported:
 - [ext2](http://en.wikipedia.org/wiki/Ext2)

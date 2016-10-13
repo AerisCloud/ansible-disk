@@ -1,4 +1,5 @@
 ---
-# Aditional disks that need to be formated and mouted.
+# Aditional disks that need to be formated and mounted.
 # See README for syntax and usage.
 disk_additional_disks: []
+disk_package_use: auto

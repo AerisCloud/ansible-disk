@@ -31,8 +31,8 @@
 - name: "Ensure the mount directory exists"
   file:
     path: '{{ item.mount }}'
-    owner: '{{ disk_user | default("root") }}'
-    group: '{{ disk_group | default("root") }}'
+    owner: '{{ item.user | default("root") }}'
+    group: '{{ item.group | default("root") }}'
     state: directory
   with_items: '{{ disk_additional_disks }}'
   tags: ['disk']

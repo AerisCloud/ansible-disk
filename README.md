@@ -20,16 +20,18 @@ disk_additional_disks:
   fstype: ext4
   mount_options: defaults
   mount: /data
+  user: www-data
+  group: www-data
 ```
 
 * `disk` is the device, you want to mount.
 * `fstype` allows you to choose the filesystem to use with the new disk.
 * `mount_options` allows you to specify custom mount options.
 * `mount` is the directory where the new disk should be mounted.
+* `user` sets owner of the mount directory (default: `root`).
+* `group` sets group of the mount directory (default: `root`).
 
 You can add:
-* `disk_user` sets owner of the mount directory (default: root)
-* `disk_group` sets group of the mount directory (default: root)
 * `disk_package_use` is the required package manager module to use (yum, apt, etc). The default 'auto' will use existing facts or try to autodetect it.
 
 The following filesystems are currently supported:

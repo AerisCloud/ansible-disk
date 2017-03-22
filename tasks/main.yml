@@ -6,12 +6,36 @@
   when: disk_additional_disks
   tags: ['disk', 'pkgs']
 
+- name: "Install additional fs progs"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ additional_fs_utils|default([]) }}"
+  when: additional_fs_utils is defined
+  tags: ['disk', 'pkgs']
+
+- name: "Get disk alignment for disks"
+  shell: |
+    if
+      [[ -e /sys/block/{{ item.disk | basename }}/queue/optimal_io_size && -e /sys/block/{{ item.disk | basename }}/alignment_offset && -e /sys/block/{{ item.disk | basename }}/queue/physical_block_size ]];
+    then
+      echo $[$(( ($(cat /sys/block/{{ item.disk | basename }}/queue/optimal_io_size) + $(cat /sys/block/{{ item.disk | basename }}/alignment_offset)) / $(cat /sys/block/{{ item.disk | basename }}/queue/physical_block_size) )) | 2048];
+    else
+      echo 2048;
+    fi
+  args:
+    creates: '{{ item.disk }}1'
+    executable: '/bin/bash'
+  with_items: '{{ disk_additional_disks }}'
+  register: disk_offset
+  tags: ['disk']
+
 - name: "Partition additional disks"
   shell: |
     if
         [ -b {{ item.disk }} ]
     then
-        [ -b {{ item.disk }}1 ] || parted --script "{{ item.disk }}" mklabel gpt mkpart primary 1MiB 100%
+        [ -b {{ item.disk }}1 ] || parted -a optimal --script "{{ item.disk }}" mklabel gpt mkpart primary {{ disk_offset.stdout|default("2048") }}s 100% && sleep 5 && partprobe {{ item.disk }}; sleep 5
     fi
   args:
     creates: '{{ item.disk }}1'
@@ -26,6 +50,12 @@
     fstype: '{{ item.fstype }}'
     opts: '{{ item.fsopts|d(omit) }}'
   with_items: '{{ disk_additional_disks }}'
+  tags: ['disk']
+
+- name: "Disable periodic fsck on ext3 or ext4 formatted disks"
+  shell: tune2fs -c0 -i0 {{ item.disk }}1
+  with_items: '{{ disk_additional_disks }}'
+  when: "disk_additional_disks and ( item.fstype == 'ext4' or item.fstype == 'ext3' )"
   tags: ['disk']
 
 - name: "Ensure the mount directory exists"

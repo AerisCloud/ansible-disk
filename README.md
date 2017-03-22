@@ -16,12 +16,12 @@ syntax, you have to write it in a `group_vars` directory.
 ```yaml
 # inventory/group_vars/GROUP_NAME
 disk_additional_disks:
-- disk: /dev/sdb
-  fstype: ext4
-  mount_options: defaults
-  mount: /data
-  user: www-data
-  group: www-data
+ - disk: /dev/sdb
+   fstype: ext4
+   mount_options: defaults
+   mount: /data
+   user: www-data
+   group: www-data
 ```
 
 * `disk` is the device, you want to mount.
@@ -38,6 +38,17 @@ The following filesystems are currently supported:
 - [ext2](http://en.wikipedia.org/wiki/Ext2)
 - [ext3](http://en.wikipedia.org/wiki/Ext3)
 - [ext4](http://en.wikipedia.org/wiki/Ext4)
+- [xfs](http://en.wikipedia.org/wiki/XFS) *
+- [btrfs]((http://en.wikipedia.org/wiki/BTRFS) *
+
+* Note: To use these filesystems you have to define and install additional software packages. Please estimate the right package names for your operating system.
+
+```yaml
+# inventory/group_vars/GROUP_NAME
+additional_fs_utils:
+  - xfsprogs     # package for mkfs.xfs on CentOS
+  - btrfs-progs  # package for mkfs.btrfs on CentOS
+```
 
 How it works
 ------------

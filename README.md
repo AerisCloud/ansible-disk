@@ -39,9 +39,9 @@ The following filesystems are currently supported:
 - [ext3](http://en.wikipedia.org/wiki/Ext3)
 - [ext4](http://en.wikipedia.org/wiki/Ext4)
 - [xfs](http://en.wikipedia.org/wiki/XFS) *
-- [btrfs]((http://en.wikipedia.org/wiki/BTRFS) *
+- [btrfs](http://en.wikipedia.org/wiki/BTRFS) *
 
-* Note: To use these filesystems you have to define and install additional software packages. Please estimate the right package names for your operating system.
+*) Note: To use these filesystems you have to define and install additional software packages. Please estimate the right package names for your operating system.
 
 ```yaml
 # inventory/group_vars/GROUP_NAME

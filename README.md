@@ -22,6 +22,7 @@ disk_additional_disks:
    mount: /data
    user: www-data
    group: www-data
+   disable_periodic_fsck: false
 ```
 
 * `disk` is the device, you want to mount.
@@ -30,6 +31,7 @@ disk_additional_disks:
 * `mount` is the directory where the new disk should be mounted.
 * `user` sets owner of the mount directory (default: `root`).
 * `group` sets group of the mount directory (default: `root`).
+* `disable_periodic_fsck` deactivates the periodic ext3/4 filesystem check for the new disk.
 
 You can add:
 * `disk_package_use` is the required package manager module to use (yum, apt, etc). The default 'auto' will use existing facts or try to autodetect it.
@@ -46,8 +48,8 @@ The following filesystems are currently supported:
 ```yaml
 # inventory/group_vars/GROUP_NAME
 additional_fs_utils:
-  - xfsprogs     # package for mkfs.xfs on CentOS
-  - btrfs-progs  # package for mkfs.btrfs on CentOS
+  - xfsprogs     # package for mkfs.xfs on RedHat / Ubuntu
+  - btrfs-progs  # package for mkfs.btrfs on CentOS / Debian
 ```
 
 How it works

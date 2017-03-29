@@ -3,3 +3,4 @@
 # See README for syntax and usage.
 disk_additional_disks: []
 disk_package_use: auto
+additional_fs_utils: []

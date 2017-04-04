@@ -55,7 +55,7 @@
 - name: "Disable periodic fsck on ext3 or ext4 formatted disks"
   shell: tune2fs -c0 -i0 {{ item.disk }}1
   with_items: '{{ disk_additional_disks }}'
-  when: "disk_additional_disks and ( item.fstype == 'ext4' or item.fstype == 'ext3' ) and item.disable_periodic_fsck|bool"
+  when: "disk_additional_disks and ( item.fstype == 'ext4' or item.fstype == 'ext3' ) and item.disable_periodic_fsck|default(false)|bool"
   tags: ['disk']
 
 - name: "Ensure the mount directory exists"

@@ -23,9 +23,15 @@ disk_additional_disks:
    user: www-data
    group: www-data
    disable_periodic_fsck: false
+ - disk: /dev/nvme0n1
+   part: /dev/nvme0n1p1
+   fstype: xfs
+   mount_options: defaults,noatime
+   mount: /data2
 ```
 
 * `disk` is the device, you want to mount.
+* `part` is the first partition name. If not specified, `1` will be appended to the disk name.
 * `fstype` allows you to choose the filesystem to use with the new disk.
 * `mount_options` allows you to specify custom mount options.
 * `mount` is the directory where the new disk should be mounted.

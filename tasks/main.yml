@@ -6,10 +6,7 @@
 
 - set_fact:
     disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
-  when: __disk_config is defined and __disk_config | success
-
-- debug:
-    var: disk_additional_disks
+  when: __disk_config is defined and __disk_config | success and 'ansible_facts' in __disk_config
 
 - name: "Install parted"
   package:

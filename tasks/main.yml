@@ -1,3 +1,13 @@
+- name: "Discover NVMe EBS"
+  disk_config:
+    config: "{{ disk_additional_disks }}"
+  register: __disk_config
+  when: disk_discover_aws_nvme_ebs | default(True) | bool
+
+- set_fact:
+    disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
+  when: __disk_config is defined and __disk_config | success and 'ansible_facts' in __disk_config
+
 - name: "Install parted"
   package:
     name: parted

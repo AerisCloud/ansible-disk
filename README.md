@@ -28,6 +28,10 @@ disk_additional_disks:
    fstype: xfs
    mount_options: defaults,noatime
    mount: /data2
+ - device_name: /dev/sdf
+   fstype: ext4
+   mount_options: defaults
+   mount: /data
 ```
 
 * `disk` is the device, you want to mount.

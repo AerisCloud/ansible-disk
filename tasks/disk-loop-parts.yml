@@ -1,0 +1,70 @@
+---
+
+- name: disk | Partition additional disks
+  parted:
+    align: optimal
+    device: "{{ item.disk }}"
+    label: "{{ item.label | d('gpt') }}"
+    name: "{{ part.name | d(omit)}}"
+    number: "{{ part_index + 1 }}"
+    part_end: "{{part.end | d(omit) }}"
+    part_start: "{{ part.start | d(omit) }}"
+    part_type: primary
+    state: present
+  become: true
+  loop: "{{ item.parts | flatten(levels=1) }}"
+  loop_control:
+    loop_var: part
+    index_var: part_index
+
+- name: disk | Make a filesystem on partitions
+  filesystem:
+    dev: "{{ part.name | d(item.disk + (part_index + 1) | string)}}"
+    force: "{{ part.force | d(omit) }}"
+    fstype: "{{ part.fstype }}"
+    opts: "{{ part.fsopts | d(omit) }}"
+    resizefs: true
+  become: true
+  loop: "{{ item.parts | flatten(levels=1) }}"
+  loop_control:
+    loop_var: part
+    index_var: part_index
+  when:
+    - part.fstype is defined
+
+- name: disk | Disable periodic fsck on ext3 or ext4 formatted parts
+  command: |
+    tune2fs -c0 -i0 {{ part.name | d(item.disk + (part_index + 1) | string) }}
+  become: true
+  loop: "{{ item.parts | flatten(levels=1) }}"
+  loop_control:
+    loop_var: part
+    index_var: part_index
+  when:
+    - part.fstype is defined
+    - ( part.fstype == 'ext4' or part.fstype == 'ext3' )
+    - part.disable_periodic_fsck | d(false) | bool
+
+- name: disk | Ensure the mount directory exists
+  file:
+    path: "{{ part.mount }}"
+    owner: "{{ part.user | d('root') }}"
+    group: "{{ part.group | d('root') }}"
+    state: directory
+  become: true
+  loop: "{{ item.parts | flatten(levels=1) }}"
+  loop_control:
+    loop_var: part
+    index_var: part_index
+  when:
+    - part.mount is defined
+
+- name: disk | Get UUID and mount partition
+  include_tasks: disk-part-mount.yml
+  loop: "{{ item.parts | flatten(levels=1) }}"
+  loop_control:
+    loop_var: part
+    index_var: part_index
+  when:
+    - part.mount is defined
+    - part.fstype is defined

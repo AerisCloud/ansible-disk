@@ -1,0 +1,65 @@
+---
+
+- name: disk | Make filesystem on disk
+  filesystem:
+    dev: "{{ item.disk }}"
+    force: "{{ item.force | d(omit) }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.fsopts | d(omit) }}"
+    resizefs: true
+  become: true
+  when:
+    - item.fstype is defined
+
+- name: disk | Disable periodic fsck on ext3 or ext4
+  command: |
+    tune2fs -c0 -i0 {{ item.disk }}
+  become: true
+  when:
+    - item.fstype is defined
+    - ( item.fstype == 'ext4' or item.fstype == 'ext3' )
+    - item.disable_periodic_fsck | d(false) | bool
+
+- name: disk | Ensure the mount directory exists
+  file:
+    path: "{{ item.mount }}"
+    owner: "{{ item.user | d('root') }}"
+    group: "{{ item.group | d('root') }}"
+    state: directory
+  become: true
+  when:
+    - item.mount is defined
+
+- name: disk | Get UUID for partition
+  command: |
+    blkid -s UUID -o value {{ item.disk }}
+  become: true
+  changed_when: false
+  register: disk_blkid
+  when:
+    - item.fstype is defined
+
+- name: disk | Mount additional disk
+  mount:
+    name: "{{ item.mount }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.mount_options | d(omit) }}"
+    passno: '0'
+    src: "UUID={{ disk_blkid.stdout }}"
+    state: "{{ item.mount_state | d('mounted') }}"
+  become: true
+  when:
+    - item.fstype is defined
+    - item.mount is defined
+    - disk_blkid.rc == 0
+    - disk_blkid.stdout | length > 0
+
+- name: disk | Ensure the permissions are set correctly after mount
+  file:
+    path: "{{ item.mount }}"
+    owner: "{{ item.user | d('root') }}"
+    group: "{{ item.group | d('root') }}"
+    state: directory
+  become: true
+  when:
+    - item.mount is defined

@@ -1,117 +1,51 @@
-- name: "Discover NVMe EBS"
-  disk_config:
-    config: "{{ disk_additional_disks }}"
-  register: __disk_config
-  when: disk_discover_aws_nvme_ebs | default(True) | bool
+---
 
-- name: setting fact if ansible version is 2.5 or older
-  block:
-  - set_fact:
-      disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
-    when: __disk_config is defined and __disk_config | success and 'ansible_facts' in __disk_config
-  when: ansible_version.full is version('2.5.0', '<')
+- name: AWS NVMe EBS
+  include_tasks: disk-aws-nvme-ebs.yml
+  when:
+    - disk_discover_aws_nvme_ebs | bool
 
-- name: setting fact if ansible version is newer than 2.5
-  block:
-  - set_fact:
-      disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
-    when: __disk_config is defined and __disk_config is not successful and 'ansible_facts' in __disk_config
-  when: ansible_version.full is version('2.5.0', '>=')
-
-- name: "Install parted"
+- name: Install parted and disk utils
   package:
-    name: parted
+    name:
+      - parted
+      - scsitools
     state: present
-    use: '{{ disk_package_use }}'
-  when: disk_additional_disks
-  tags: ['disk', 'pkgs']
+  become: true
 
-- name: "Install additional fs progs"
+- name: Install additional fs progs
   package:
-    name: "{{ item }}"
+    name: "{{ disk_additional_fs_utils }}"
     state: present
-  with_items: "{{ additional_fs_utils|default([]) }}"
-  when: additional_fs_utils is defined
-  tags: ['disk', 'pkgs']
+  become: true
+  when:
+    - disk_additional_fs_utils is defined
 
-- name: "Get disk alignment for disks"
-  shell: |
-    if
-      [[ -e /sys/block/{{ item.disk | basename }}/queue/optimal_io_size && -e /sys/block/{{ item.disk | basename }}/alignment_offset && -e /sys/block/{{ item.disk | basename }}/queue/physical_block_size ]];
-    then
-      echo $[$(( ($(cat /sys/block/{{ item.disk | basename }}/queue/optimal_io_size) + $(cat /sys/block/{{ item.disk | basename }}/alignment_offset)) / $(cat /sys/block/{{ item.disk | basename }}/queue/physical_block_size) )) | 2048];
-    else
-      echo 2048;
-    fi
-  args:
-    creates: '{{ item.part | default(item.disk + "1") }}'
-    executable: '/bin/bash'
-  with_items: '{{ disk_additional_disks }}'
-  register: disk_offset
-  tags: ['disk']
+- name: Checking for scsi devices
+  command: |
+    sg_scan
+  become: true
+  changed_when: false
+  register: scsi_devices
 
-- name: "Partition additional disks"
-  shell: |
-    if
-        [ -b {{ item.disk }} ]
-    then
-        [ -b {{ item.part | default(item.disk + "1") }} ] || parted -a optimal --script "{{ item.disk }}" mklabel gpt mkpart primary {{ disk_offset.stdout|default("2048") }}s 100% && sleep 5 && partprobe {{ item.disk }}; sleep 5
-    fi
-  args:
-    creates: '{{ item.part | default(item.disk + "1") }}'
-    executable: '/bin/bash'
-  with_items: '{{ disk_additional_disks }}'
-  tags: ['disk']
+- name: Rescan SCSI disks
+  command: |
+    /sbin/rescan-scsi-bus --forcerescan
+  become: true
+  changed_when: false
+  when:
+    - scsi_devices.stdout != ''
 
-- name: "Create filesystem on the first partition"
-  filesystem:
-    dev: '{{ item.part | default(item.disk + "1") }}'
-    force: '{{ item.force|d(omit) }}'
-    fstype: '{{ item.fstype }}'
-    opts: '{{ item.fsopts|d(omit) }}'
-  with_items: '{{ disk_additional_disks }}'
-  tags: ['disk']
+- name: Whole disk usage
+  include_tasks: disk-loop.yml
+  with_items:
+    - "{{ disk_additional_disks }}"
+  when:
+    - item.parts is undefined
 
-- name: "Disable periodic fsck on ext3 or ext4 formatted disks"
-  shell: tune2fs -c0 -i0 {{ item.part | default(item.disk + "1") }}
-  with_items: '{{ disk_additional_disks }}'
-  when: "disk_additional_disks and ( item.fstype == 'ext4' or item.fstype == 'ext3' ) and item.disable_periodic_fsck|default(false)|bool"
-  tags: ['disk']
-
-- name: "Ensure the mount directory exists"
-  file:
-    path: '{{ item.mount }}'
-    owner: '{{ item.user | default("root") }}'
-    group: '{{ item.group | default("root") }}'
-    state: directory
-  with_items: '{{ disk_additional_disks }}'
-  tags: ['disk']
-
-- name: "Get UUID for partition"
-  command: blkid -s UUID -o value {{ item.part | default(item.disk + "1") }}
-  register: disk_blkid
-  with_items: '{{ disk_additional_disks }}'
-  changed_when: False
-  tags: ['disk']
-
-- name: "Mount additional disk"
-  mount:
-    name: '{{ item.0.mount }}'
-    fstype: '{{ item.0.fstype }}'
-    opts: '{{ item.0.mount_options|d(omit) }}'
-    passno: '0'
-    src: 'UUID={{ item.1.stdout }}'
-    state: '{{ item.0.mount_state|d("mounted") }}'
-  with_together:
-    - '{{ disk_additional_disks }}'
-    - '{{ disk_blkid.results }}'
-  tags: ['disk']
-
-- name: "Ensure the permissions are set correctly"
-  file:
-    path: '{{ item.mount }}'
-    owner: '{{ item.user | default("root") }}'
-    group: '{{ item.group | default("root") }}'
-    state: directory
-  with_items: '{{ disk_additional_disks }}'
-  tags: ['disk']
+- name: Part disk usage
+  include_tasks: disk-loop-parts.yml
+  with_items:
+    - "{{ disk_additional_disks }}"
+  when:
+    - item.parts is defined

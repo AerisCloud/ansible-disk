@@ -26,7 +26,7 @@ disk_additional_disks:
     group: www-data
     disable_periodic_fsck: false
   - disk: /dev/nvme0n1
-    lable: gpt
+    label: gpt
     parts:
       - fstype: xfs
         mount_options: defaults,noatime

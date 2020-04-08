@@ -35,6 +35,7 @@
     blkid -s UUID -o value {{ item.disk }}
   become: true
   changed_when: false
+  check_mode: false
   register: disk_blkid
   when:
     - item.fstype is defined

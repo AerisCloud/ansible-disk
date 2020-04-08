@@ -26,6 +26,7 @@
     sg_scan
   become: true
   changed_when: false
+  check_mode: false
   register: scsi_devices
 
 - name: Rescan SCSI disks

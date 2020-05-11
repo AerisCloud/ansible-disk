@@ -92,6 +92,7 @@
   register: disk_blkid
   with_items: '{{ disk_additional_disks }}'
   changed_when: False
+  check_mode: no
   tags: ['disk']
 
 - name: "Mount additional disk"

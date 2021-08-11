@@ -113,6 +113,7 @@
     path: '{{ item.mount }}'
     owner: '{{ item.user | default("root") }}'
     group: '{{ item.group | default("root") }}'
+    mode: '{{ item.mode | default(0775) }}'
     state: directory
   with_items: '{{ disk_additional_disks }}'
   tags: ['disk']

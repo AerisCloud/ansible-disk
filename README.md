@@ -22,6 +22,7 @@ disk_additional_disks:
    mount: /data
    user: www-data
    group: www-data
+   mode: 0755
    disable_periodic_fsck: false
  - disk: /dev/nvme0n1
    part: /dev/nvme0n1p1
@@ -41,6 +42,7 @@ disk_additional_disks:
 * `mount` is the directory where the new disk should be mounted.
 * `user` sets owner of the mount directory (default: `root`).
 * `group` sets group of the mount directory (default: `root`).
+* `mode` sets the mountpoint directory permissions (default: `0775`).
 * `disable_periodic_fsck` deactivates the periodic ext3/4 filesystem check for the new disk.
 
 You can add:

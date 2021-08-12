@@ -42,7 +42,7 @@ disk_additional_disks:
 * `mount` is the directory where the new disk should be mounted.
 * `user` sets owner of the mount directory (default: `root`).
 * `group` sets group of the mount directory (default: `root`).
-* `mode` sets the mountpoint directory permissions (default: `0775`).
+* `mode` sets the mountpoint directory permissions (default: `0755`).
 * `disable_periodic_fsck` deactivates the periodic ext3/4 filesystem check for the new disk.
 
 You can add:

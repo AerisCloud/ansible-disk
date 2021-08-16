@@ -102,7 +102,7 @@
     opts: '{{ item.0.mount_options|d(omit) }}'
     passno: '0'
     src: 'UUID={{ item.1.stdout }}'
-    state: '{{ item.0.mount_state|d("mounted") }}'
+    state: '{{ item.0.mount_state | default("mounted") }}'
   with_together:
     - '{{ disk_additional_disks }}'
     - '{{ disk_blkid.results }}'
@@ -113,6 +113,7 @@
     path: '{{ item.mount }}'
     owner: '{{ item.user | default("root") }}'
     group: '{{ item.group | default("root") }}'
+    mode: '{{ item.mode | default("0755") }}'
     state: directory
   with_items: '{{ disk_additional_disks }}'
   tags: ['disk']

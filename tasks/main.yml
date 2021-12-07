@@ -67,7 +67,6 @@
 
 - name: "Create filesystem on the volume"
   filesystem:
-    #dev: '{{ item.part | default(item.disk + "1") }}'
     dev: '{{ (disk_enable_partitioning == true) | ternary(item.part | default(item.disk + "1"), item.disk) }}'
     force: '{{ item.force|d(omit) }}'
     fstype: '{{ item.fstype }}'

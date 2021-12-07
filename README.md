@@ -47,7 +47,7 @@ disk_additional_disks:
 
 You can add:
 * `disk_package_use` is the required package manager module to use (yum, apt, etc). The default 'auto' will use existing facts or try to autodetect it.
-* `disk_enable_partioning: false` to optionnaly disable partitioning
+* `disk_enable_partioning: false` to disable partitioning
 
 The following filesystems are currently supported:
 - [ext2](http://en.wikipedia.org/wiki/Ext2)

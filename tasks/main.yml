@@ -23,7 +23,7 @@
     name: parted
     state: present
     use: '{{ disk_package_use }}'
-  when: disk_additional_disks
+  when: disk_additional_disks and disk_enable_partitioning
   tags: ['disk', 'pkgs']
 
 - name: "Install additional fs progs"
@@ -47,6 +47,7 @@
     creates: '{{ item.part | default(item.disk + "1") }}'
     executable: '/bin/bash'
   with_items: '{{ disk_additional_disks }}'
+  when: disk_enable_partitioning
   register: disk_offset
   tags: ['disk']
 
@@ -61,11 +62,12 @@
     creates: '{{ item.part | default(item.disk + "1") }}'
     executable: '/bin/bash'
   with_items: '{{ disk_additional_disks }}'
+  when: disk_enable_partitioning
   tags: ['disk']
 
-- name: "Create filesystem on the first partition"
+- name: "Create filesystem on the volume"
   filesystem:
-    dev: '{{ item.part | default(item.disk + "1") }}'
+    dev: '{{ (disk_enable_partitioning == true) | ternary(item.part | default(item.disk + "1"), item.disk) }}'
     force: '{{ item.force|d(omit) }}'
     fstype: '{{ item.fstype }}'
     opts: '{{ item.fsopts|d(omit) }}'
@@ -73,7 +75,7 @@
   tags: ['disk']
 
 - name: "Disable periodic fsck on ext3 or ext4 formatted disks"
-  shell: tune2fs -c0 -i0 {{ item.part | default(item.disk + "1") }}
+  shell: 'tune2fs -c0 -i0 {{ (disk_enable_partitioning == true) | ternary(item.part | default(item.disk + "1"), item.disk) }}'
   with_items: '{{ disk_additional_disks }}'
   when: "disk_additional_disks and ( item.fstype == 'ext4' or item.fstype == 'ext3' ) and item.disable_periodic_fsck|default(false)|bool"
   tags: ['disk']
@@ -87,8 +89,8 @@
   with_items: '{{ disk_additional_disks }}'
   tags: ['disk']
 
-- name: "Get UUID for partition"
-  command: blkid -s UUID -o value {{ item.part | default(item.disk + "1") }}
+- name: "Get UUID for volume"
+  command: 'blkid -s UUID -o value {{ (disk_enable_partitioning == true) | ternary(item.part | default(item.disk + "1"), item.disk) }}'
   register: disk_blkid
   with_items: '{{ disk_additional_disks }}'
   changed_when: False

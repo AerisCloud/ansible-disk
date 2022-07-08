@@ -3,6 +3,7 @@
     config: "{{ disk_additional_disks }}"
   register: __disk_config
   when: disk_discover_aws_nvme_ebs | default(True) | bool
+  tags: ['disk']
 
 - name: setting fact if ansible version is 2.5 or older
   block:
@@ -10,13 +11,15 @@
       disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
     when: __disk_config is defined and __disk_config | success and 'ansible_facts' in __disk_config
   when: ansible_version.full is version('2.5.0', '<')
+  tags: ['disk']
 
 - name: setting fact if ansible version is newer than 2.5
   block:
   - set_fact:
       disk_additional_disks: "{{ __disk_config['ansible_facts']['config'] }}"
-    when: __disk_config is defined and __disk_config is not successful and 'ansible_facts' in __disk_config
+    when: __disk_config is defined and __disk_config is successful and 'ansible_facts' in __disk_config
   when: ansible_version.full is version('2.5.0', '>=')
+  tags: ['disk']
 
 - name: "Install parted"
   package:

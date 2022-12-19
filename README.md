@@ -22,7 +22,7 @@ disk_additional_disks:
    mount: /data
    user: www-data
    group: www-data
-   mode: 0755
+   mode: "0755"
    disable_periodic_fsck: false
  - disk: /dev/nvme0n1
    part: /dev/nvme0n1p1
